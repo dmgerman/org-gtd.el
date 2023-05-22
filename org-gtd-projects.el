@@ -178,19 +178,33 @@ other undone tasks are marked as `org-gtd-todo'."
       (let* ((org-gtd-refile-to-any-target nil)
              (org-use-property-inheritance '("ORG_GTD"))
              (headings (org-map-entries
-                        (lambda () (org-get-heading t t t t))
+                        ;; build a pair: prompt string and buffer
+                        (lambda () (let ((cbuffer (current-buffer))
+                                         (heading (org-get-heading t t t t)))
+                                     (cons (format "%s %s" (buffer-name) heading)
+                                           (cons heading cbuffer)
+                                           )))
                         org-gtd-project-headings
                         'agenda))
-             (chosen-heading (completing-read "Choose a heading: " headings nil t))
-             (heading-marker (org-find-exact-heading-in-directory chosen-heading org-gtd-directory)))
+             ;; complete reading ignores the cdr, and removes duplicates
+             ;; so we need to find its first match
+             (chosen-location
+              (cdr (assoc (completing-read "Choose a destination:" headings nil t)
+                           headings)))
+             (chosen-heading (car chosen-location))
+             (chosen-buffer (cdr chosen-location))
+             (heading-marker (org-find-exact-headline-in-buffer chosen-heading
+                                                                chosen-buffer)))
         (setq-local org-gtd--organize-type 'project-task)
         (org-gtd-organize-apply-hooks)
         (org-refile 3 nil `(,chosen-heading
-                            ,(buffer-file-name (marker-buffer heading-marker))
-                            nil
-                            ,(marker-position heading-marker))
+                            ,(buffer-file-name chosen-buffer)
+                              nil
+                              ,(marker-position heading-marker))
                     nil)
-        (org-gtd-projects-fix-todo-keywords heading-marker))))
+        (org-gtd-projects-fix-todo-keywords heading-marker)
+        (message "Moved to %s %s" (buffer-name chosen-buffer) chosen-heading)
+        )))
 
 (defun org-gtd-projects--apply-organize-hooks-to-tasks ()
   "Decorate tasks for project at point."
