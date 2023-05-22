@@ -216,7 +216,8 @@ This function is called through the inbox clarification process."
   (let* ((org-id (org-gtd-id-get-create))
          (buffer (get-buffer-create (org-gtd-clarify--buffer-name org-id))))
     (with-current-buffer buffer
-      (unless (eq major-mode 'org-mode) (org-mode))
+      (unless (eq major-mode 'org-mode)
+        (with-temp-message "" (org-mode)))
       (org-gtd-core-prepare-buffer)
       (org-gtd-clarify-mode 1)
       buffer)))
