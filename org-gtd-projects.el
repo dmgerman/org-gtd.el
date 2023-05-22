@@ -203,7 +203,7 @@ other undone tasks are marked as `org-gtd-todo'."
                               ,(marker-position heading-marker))
                     nil)
         (org-gtd-projects-fix-todo-keywords heading-marker)
-        (message "Moved to %s %s" (buffer-name chosen-buffer) chosen-heading)
+        (message "Moved to %s %s" (buffer-name chosen-buffer) (substring-no-properties chosen-heading))
         )))
 
 (defun org-gtd-projects--apply-organize-hooks-to-tasks ()
