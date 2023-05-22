@@ -230,13 +230,17 @@ This function is called through the inbox clarification process."
 (defun org-gtd-clarify--maybe-initialize-buffer-contents (buffer)
   "If BUFFER is empty, then copy org heading at point and paste inside buffer."
   (when (= (buffer-size buffer) 0)
-    (let ((last-command nil))
-      (org-copy-subtree))
-    (with-current-buffer buffer
-      (org-paste-subtree)
-      (org-entry-delete (point) org-gtd-timestamp)
-      (org-entry-delete (point) org-gtd-delegate-property)
-      (org-entry-delete (point) "STYLE"))))
+    (let* (
+          (start (progn (org-back-to-heading) (point)))
+          (end (progn (org-end-of-subtree) (point)))
+          (entry (buffer-substring start end))
+          )
+      (with-current-buffer buffer
+        (insert entry)
+        (org-entry-delete (point) org-gtd-timestamp)
+        (org-entry-delete (point) org-gtd-delegate-property)
+        (org-entry-delete (point) "STYLE")
+        ))))
 
 ;;;; Footer
 
